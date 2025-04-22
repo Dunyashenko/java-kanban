@@ -1,3 +1,5 @@
+package com.yandex.task_tracker.model;
+
 import java.util.ArrayList;
 
 public class Epic extends Task {
@@ -15,6 +17,15 @@ public class Epic extends Task {
 
     public void setSubtasks(ArrayList<Subtask> subtasks) {
         this.subtasks = subtasks;
+    }
+
+    public void updateSubtask(Subtask newSubtask) {
+        for (int i = 0; i < subtasks.size(); i++) {
+            if (subtasks.get(i).getId() == newSubtask.getId()) {
+                subtasks.set(i, newSubtask);
+                break;
+            }
+        }
     }
 
     public void addSubtask(Subtask subtask) {

@@ -1,3 +1,5 @@
+package com.yandex.task_tracker.model;
+
 public class Subtask extends Task {
 
     private int epicId;
