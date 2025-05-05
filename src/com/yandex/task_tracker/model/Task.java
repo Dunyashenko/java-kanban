@@ -16,6 +16,13 @@ public class Task {
         this.status = Status.NEW;
     }
 
+    public Task(Task task) {
+        this.name = task.name;
+        this.description = task.description;
+        this.id = task.id;
+        this.status = task.status;
+    }
+
     public String getName() {
         return name;
     }
@@ -32,7 +39,7 @@ public class Task {
         this.description = description;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 

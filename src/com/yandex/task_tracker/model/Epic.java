@@ -1,6 +1,7 @@
 package com.yandex.task_tracker.model;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Epic extends Task {
 
@@ -8,7 +9,20 @@ public class Epic extends Task {
 
     public Epic(String name, String description, Integer id, ArrayList<Subtask> subtasks) {
         super(name, description, id);
-        this.subtasks = subtasks;
+        if (!subtasks.isEmpty()) {
+            for (Subtask subtask : subtasks) {
+                if (!Objects.equals(subtask.getId(), this.getId())) {
+                    this.subtasks.add(subtask);
+                }
+            }
+        } else {
+            this.subtasks = new ArrayList<>();
+        }
+    }
+
+    public Epic(Epic epic) {
+        super(epic.getName(), epic.getDescription(), epic.getId());
+        this.subtasks = epic.getSubtasks();
     }
 
     public ArrayList<Subtask> getSubtasks() {
@@ -21,7 +35,7 @@ public class Epic extends Task {
 
     public void updateSubtask(Subtask newSubtask) {
         for (int i = 0; i < subtasks.size(); i++) {
-            if (subtasks.get(i).getId() == newSubtask.getId()) {
+            if (Objects.equals(subtasks.get(i).getId(), newSubtask.getId())) {
                 subtasks.set(i, newSubtask);
                 break;
             }
@@ -29,6 +43,9 @@ public class Epic extends Task {
     }
 
     public void addSubtask(Subtask subtask) {
+        if (Objects.equals(subtask.getId(), this.getId())) {
+            return;
+        }
         subtasks.add(subtask);
     }
 
