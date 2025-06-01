@@ -7,7 +7,7 @@ import com.yandex.task_tracker.model.Task;
 import com.yandex.task_tracker.service.HistoryManager;
 import com.yandex.task_tracker.service.InMemoryHistoryManager;
 import com.yandex.task_tracker.service.InMemoryTaskManager;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,11 +17,11 @@ import java.util.List;
 
 class InMemoryTaskManagerTest {
 
-    static InMemoryTaskManager manager = new InMemoryTaskManager();
+    private InMemoryTaskManager manager;
 
-    @BeforeAll
-    public static void createItems() {
-
+    @BeforeEach
+    public void createItems() {
+        manager = new InMemoryTaskManager();
         Task task1 = new Task("Task 1", "task description 1", null);
         Task task2 = new Task("Task 2", "task description 2", 1000);
 
@@ -73,7 +73,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    public void AllFieldsOfTaskExceptIdShouldNotChangeAfterCreatingInManager() {
+    public void allFieldsOfTaskExceptIdShouldNotChangeAfterCreatingInManager() {
         InMemoryTaskManager manager = new InMemoryTaskManager();
 
         Task task3 = new Task("Task 1", "task description 1", null);
@@ -104,9 +104,34 @@ class InMemoryTaskManagerTest {
         assertEquals(Status.NEW, fromHistory.getStatus());
     }
 
+    @Test
+    public void epicShouldNotContainIrrelevantSubtasks() {
+        Epic epic = manager.getEpicById(1003);
+        List<Subtask> subtasks = epic.getSubtasks();
 
+        manager.deleteSubtaskById(1005);
 
+        boolean isSubtaskDeletedFromEpic = true;
+        for (Subtask subtask : subtasks) {
+            if (subtask.getId().equals(1005)) {
+                isSubtaskDeletedFromEpic = false;
+                break;
+            }
+        }
+        assertTrue(isSubtaskDeletedFromEpic);
+    }
 
+    @Test
+    void shouldNotTaskUpdatingAffectStateOfTaskInManager() {
+        Task task = new Task("Original Name", "Original Desc", null);
+        manager.createTask(task);
+        int taskId = task.getId();
 
+        Task fromManager = manager.getTaskById(taskId);
+        fromManager.setName("Changed Externally");
+
+        Task sameFromManager = manager.getTaskById(taskId);
+        assertEquals("Original Name", sameFromManager.getName());
+    }
 
 }

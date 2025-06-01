@@ -71,8 +71,9 @@ public class InMemoryTaskManager implements TaskManager {
         Task task = tasks.get(id);
         if (task != null) {
             historyManager.add(task);
+            return new Task(task);
         }
-        return task;
+        return null;
     }
 
     @Override
@@ -80,8 +81,9 @@ public class InMemoryTaskManager implements TaskManager {
         Subtask subtask = subtasks.get(id);
         if (subtask != null) {
             historyManager.add(subtask);
+            return new Subtask(subtask);
         }
-        return subtask;
+        return null;
     }
 
     @Override
@@ -89,14 +91,16 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic = epics.get(id);
         if (epic != null) {
             historyManager.add(epic);
+            return new Epic(epic);
         }
-        return epic;
+        return null;
     }
 
     @Override
     public void createTask(Task task) {
         generateId(task);
-        tasks.put(task.getId(), task);
+        Task copy = new Task(task);
+        tasks.put(copy.getId(), task);
     }
 
     @Override
@@ -106,15 +110,17 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         generateId(subtask);
-        epic.addSubtask(subtask);
+        Subtask copy = new Subtask(subtask);
+        epic.addSubtask(copy);
         epic.epicStatusMonitoring();
-        subtasks.put(subtask.getId(), subtask);
+        subtasks.put(copy.getId(), subtask);
     }
 
     @Override
     public void createEpic(Epic epic) {
         generateId(epic);
-        epics.put(epic.getId(), epic);
+        Epic copy = new Epic(epic);
+        epics.put(copy.getId(), epic);
     }
 
     @Override
