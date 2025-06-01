@@ -1,4 +1,4 @@
-package test.service;
+package service;
 
 import com.yandex.task_tracker.model.Task;
 import com.yandex.task_tracker.service.InMemoryHistoryManager;
