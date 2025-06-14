@@ -1,4 +1,4 @@
-package test.model;
+package model;
 
 import com.yandex.task_tracker.model.Subtask;
 import org.junit.jupiter.api.Test;
