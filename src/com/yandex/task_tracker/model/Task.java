@@ -9,6 +9,13 @@ public class Task {
     private Integer id;
     private Status status;
 
+    public Task(String name, String description, Integer id, Status status) {
+        this.name = name;
+        this.description = description;
+        this.id = id;
+        this.status = status;
+    }
+
     public Task(String name, String description, Integer id) {
         this.name = name;
         this.description = description;
@@ -55,14 +62,19 @@ public class Task {
         this.status = status;
     }
 
+//    @Override
+//    public String toString() {
+//        return "Task{" +
+//                "id=" + id +
+//                ", name='" + name + '\'' +
+//                ", status=" + status + '\'' +
+//                ", description=" + description +
+//                '}';
+//    }
+
     @Override
     public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", status=" + status + '\'' +
-                ", description=" + description +
-                '}';
+        return String.format("%d,%s,%s,%s,%s", id, Type.TASK.name(), name, status, description);
     }
 
     @Override
