@@ -62,16 +62,6 @@ public class Task {
         this.status = status;
     }
 
-//    @Override
-//    public String toString() {
-//        return "Task{" +
-//                "id=" + id +
-//                ", name='" + name + '\'' +
-//                ", status=" + status + '\'' +
-//                ", description=" + description +
-//                '}';
-//    }
-
     @Override
     public String toString() {
         return String.format("%d,%s,%s,%s,%s", id, Type.TASK.name(), name, status, description);

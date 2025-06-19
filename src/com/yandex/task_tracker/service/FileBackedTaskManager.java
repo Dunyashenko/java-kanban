@@ -5,11 +5,11 @@ import com.yandex.task_tracker.model.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private final File tasksFile;
+
     public FileBackedTaskManager(File file) {
         this.tasksFile = file;
     }

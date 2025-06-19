@@ -93,17 +93,6 @@ public class Epic extends Task {
         super.setStatus(status);
     }
 
-//    @Override
-//    public String toString() {
-//        return "Epic{" +
-//                "id=" + getId() +
-//                ", name='" + getName() + '\'' +
-//                ", status=" + getStatus() + '\'' +
-//                ", description=" + getDescription() + '\'' +
-//                ", subtasks=" + subtasks +
-//                '}';
-//    }
-
     @Override
     public String toString() {
         return String.format("%d,%s,%s,%s,%s", getId(), Type.EPIC.name(), getName(), getStatus(), getDescription());
