@@ -4,7 +4,8 @@ import com.yandex.task_tracker.model.Epic;
 import com.yandex.task_tracker.model.Status;
 import com.yandex.task_tracker.model.Subtask;
 import com.yandex.task_tracker.model.Task;
-import com.yandex.task_tracker.service.InMemoryTaskManager;
+import com.yandex.task_tracker.service.Managers;
+import com.yandex.task_tracker.service.TaskManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Поехали!");
 
-        InMemoryTaskManager inMemoryTaskManager = new InMemoryTaskManager();
+        TaskManager inMemoryTaskManager = Managers.getDefault();
 
         Task task1 = new Task("Task 1", "task description 1", null);
         Task task2 = new Task("Task 2", "task description 2", null);

@@ -46,8 +46,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 if ((!line.isBlank() || !line.isEmpty())
                         && !line.equals("id,type,name,status,description,epic")) {
                     Task task = fileManager.fromString(line);
+                    String[] taskDetails = line.split(",");
 
-                    switch (checkTaskType(line)) {
+                    switch (Type.valueOf(taskDetails[1])) {
                         case TASK -> fileManager.addTask(task);
                         case EPIC -> fileManager.addEpic((Epic) task);
                         case SUBTASK -> fileManager.addSubtask((Subtask) task);
@@ -63,30 +64,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public Task fromString(String value) {
-        Type taskType = checkTaskType(value);
         String[] taskDetails = value.split(",");
 
-        String name = taskDetails[2];
-        String description = taskDetails[4];
         int id = Integer.parseInt(taskDetails[0]);
+        Type type = Type.valueOf(taskDetails[1]);
+        String name = taskDetails[2];
         Status status = Status.fromString(taskDetails[3]);
+        String description = taskDetails[4];
 
-        return switch (taskType) {
+        return switch (type) {
             case TASK -> new Task(name, description, id, status);
             case SUBTASK -> new Subtask(name, description, id, status, Integer.parseInt(taskDetails[5]));
             case EPIC -> new Epic(name, description, id, status);
         };
-    }
-
-    private static Type checkTaskType(String value) {
-        String[] taskDetails = value.split(",");
-        if (taskDetails[1].equals(Type.TASK.name())) {
-            return Type.TASK;
-        } else if (taskDetails[1].equals(Type.SUBTASK.name())) {
-            return Type.SUBTASK;
-        } else {
-            return Type.EPIC;
-        }
     }
 
     @Override
