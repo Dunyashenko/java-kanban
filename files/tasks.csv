@@ -1,0 +1,4 @@
+id,type,name,status,description,epic
+1,TASK,Task 1,NEW,task description 1
+2,EPIC,Epic 1,NEW,epic description 1
+3,SUBTASK,Subtask 1,NEW,subtask description 1,2
