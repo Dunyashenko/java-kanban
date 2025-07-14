@@ -7,65 +7,60 @@ import com.yandex.task_tracker.model.Task;
 import com.yandex.task_tracker.service.HistoryManager;
 import com.yandex.task_tracker.service.InMemoryHistoryManager;
 import com.yandex.task_tracker.service.InMemoryTaskManager;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-class InMemoryTaskManagerTest {
+class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
-    private InMemoryTaskManager manager;
+    @Override
+    protected InMemoryTaskManager createTaskManager() {
+        return new InMemoryTaskManager();
+    }
 
-    @BeforeEach
-    public void createItems() {
-        manager = new InMemoryTaskManager();
+    @Test
+    public void managerShouldReturnTaskSubtaskAndEpicByIdAndWriteToHistory() {
+        InMemoryTaskManager manager = createTaskManager();
+
+        Task task1 = new Task("Task 1", "task description 1", null);
+        manager.createTask(task1);
+        Task task = manager.getTaskById(1000);
+        assertNotNull(task);
+
+        Epic epic1 = new Epic("Epic 1", "epic description 1", null, new ArrayList<>());
+        manager.createEpic(epic1);
+        Epic epic = manager.getEpicById(1001);
+        assertNotNull(epic);
+
+        Subtask subtask1 = new Subtask("Subtask 1", "subtask description 1", null,
+                LocalDateTime.now().plusDays(1), Duration.ofMinutes(90), epic1.getId());
+        Subtask subtask2 = new Subtask("Subtask 2", "subtask description 2", null,
+                LocalDateTime.now().plusDays(2), Duration.ofMinutes(60), epic1.getId());
+        manager.createSubtask(subtask1);
+        manager.createSubtask(subtask2);
+        Subtask subtask = manager.getSubtaskById(1003);
+        assertNotNull(subtask);
+
+        ArrayList<Task> history = manager.historyManager.getHistory();
+        assertEquals(task.getId(), history.get(0).getId());
+        assertEquals(epic.getId(), history.get(1).getId());
+        assertEquals(subtask.getId(), history.get(2).getId());
+    }
+
+    @Test
+    public void tasksWithProvidedIdAndGeneratedIdShouldNotConflict() {
+        InMemoryTaskManager manager = createTaskManager();
         Task task1 = new Task("Task 1", "task description 1", null);
         Task task2 = new Task("Task 2", "task description 2", 1000);
 
         manager.createTask(task1);
         manager.createTask(task2);
 
-        Epic epic1 = new Epic("Epic 1", "epic description 1", null, new ArrayList<>());
-        Epic epic2 = new Epic("Epic 2", "epic description 2", null, new ArrayList<>());
-
-        manager.createEpic(epic1);
-        manager.createEpic(epic2);
-
-        Subtask subtask1 = new Subtask("Subtask 1", "subtask description 1", null, epic1.getId());
-        Subtask subtask2 = new Subtask("Subtask 2", "subtask description 2", null, epic1.getId());
-        Subtask subtask3 = new Subtask("Subtask 3", "subtask description 3", null, epic1.getId());
-        Subtask subtask4 = new Subtask("Subtask 4", "subtask description 4", null, epic2.getId());
-        Subtask subtask5 = new Subtask("Subtask 5", "subtask description 5", null, epic2.getId());
-
-        manager.createSubtask(subtask1);
-        manager.createSubtask(subtask2);
-        manager.createSubtask(subtask3);
-        manager.createSubtask(subtask4);
-        manager.createSubtask(subtask5);
-    }
-
-    @Test
-    public void managerShouldReturnTaskSubtaskAndEpicByIdAndWriteToHistory() {
-        Task task = manager.getTaskById(1000);
-        assertNotNull(task);
-
-        Subtask subtask = manager.getSubtaskById(1004);
-        assertNotNull(subtask);
-
-        Epic epic = manager.getEpicById(1002);
-        assertNotNull(epic);
-
-        ArrayList<Task> history = manager.historyManager.getHistory();
-        assertEquals(task.getId(), history.get(0).getId());
-        assertEquals(subtask.getId(), history.get(1).getId());
-        assertEquals(epic.getId(), history.get(2).getId());
-    }
-
-    @Test
-    public void tasksWithProvidedIdAndGeneratedIdShouldNotConflict() {
         List<Task> tasks = manager.getAllTasks();
 
         assertNotEquals(tasks.get(0).getId(), tasks.get(1).getId());
@@ -74,16 +69,16 @@ class InMemoryTaskManagerTest {
 
     @Test
     public void allFieldsOfTaskExceptIdShouldNotChangeAfterCreatingInManager() {
-        InMemoryTaskManager manager = new InMemoryTaskManager();
+        InMemoryTaskManager manager = createTaskManager();
 
-        Task task3 = new Task("Task 1", "task description 1", null);
-        manager.createTask(task3);
-        Task task = manager.getTaskById(1000);
+        Task task = new Task("Task 1", "task description 1", null);
+        manager.createTask(task);
+        Task taskFromManager = manager.getTaskById(1000);
 
-        assertEquals(task3.getName(), task.getName());
-        assertEquals(task3.getDescription(), task.getDescription());
-        assertEquals(task3.getStatus(), task.getStatus());
-        assertEquals(task3.getName(), task.getName());
+        assertEquals(task.getName(), taskFromManager.getName());
+        assertEquals(task.getDescription(), taskFromManager.getDescription());
+        assertEquals(task.getStatus(), taskFromManager.getStatus());
+        assertEquals(task.getName(), taskFromManager.getName());
     }
 
     @Test
@@ -106,14 +101,25 @@ class InMemoryTaskManagerTest {
 
     @Test
     public void epicShouldNotContainIrrelevantSubtasks() {
-        Epic epic = manager.getEpicById(1003);
+        InMemoryTaskManager manager = createTaskManager();
+        Epic epic1 = new Epic("Epic 1", "epic description 1", null, new ArrayList<>());
+        manager.createEpic(epic1);
+
+        Subtask subtask1 = new Subtask("Subtask 1", "subtask description 1", null,
+                LocalDateTime.now().plusDays(1), Duration.ofMinutes(90), epic1.getId());
+        Subtask subtask2 = new Subtask("Subtask 2", "subtask description 2", null,
+                LocalDateTime.now().plusDays(2), Duration.ofMinutes(60), epic1.getId());
+        manager.createSubtask(subtask1);
+        manager.createSubtask(subtask2);
+
+        Epic epic = manager.getEpicById(1000);
         List<Subtask> subtasks = epic.getSubtasks();
 
-        manager.deleteSubtaskById(1005);
+        manager.deleteSubtaskById(1002);
 
         boolean isSubtaskDeletedFromEpic = true;
         for (Subtask subtask : subtasks) {
-            if (subtask.getId().equals(1005)) {
+            if (subtask.getId().equals(1002)) {
                 isSubtaskDeletedFromEpic = false;
                 break;
             }
@@ -122,7 +128,8 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void shouldNotTaskUpdatingAffectStateOfTaskInManager() {
+    public void shouldNotTaskUpdatingAffectStateOfTaskInManager() {
+        InMemoryTaskManager manager = createTaskManager();
         Task task = new Task("Original Name", "Original Desc", null);
         manager.createTask(task);
         int taskId = task.getId();
@@ -132,6 +139,31 @@ class InMemoryTaskManagerTest {
 
         Task sameFromManager = manager.getTaskById(taskId);
         assertEquals("Original Name", sameFromManager.getName());
+    }
+
+    @Test
+    public void shouldSaveTasksInPrioritizedOrder() {
+        InMemoryTaskManager manager = createTaskManager();
+
+        Task task1 = new Task("Task 1", "task description 1", 1000, LocalDateTime.now().plusDays(2),
+                Duration.ofMinutes(60));
+        manager.createTask(task1);
+
+        Epic epic1 = new Epic("Epic 1", "epic description 1", null, new ArrayList<>());
+        manager.createEpic(epic1);
+
+        Subtask subtask1 = new Subtask("Subtask 1", "subtask description 1", null,
+                LocalDateTime.now(), Duration.ofMinutes(90), epic1.getId());
+        Subtask subtask2 = new Subtask("Subtask 2", "subtask description 2", null,
+                LocalDateTime.now().plusDays(1), Duration.ofMinutes(60), epic1.getId());
+        manager.createSubtask(subtask1);
+        manager.createSubtask(subtask2);
+
+        List<Task> prioritizedTasks = manager.getPrioritizedTasks();
+
+        assertEquals(subtask1, prioritizedTasks.get(0));
+        assertEquals(subtask2, prioritizedTasks.get(1));
+        assertEquals(task1, prioritizedTasks.get(2));
     }
 
 }

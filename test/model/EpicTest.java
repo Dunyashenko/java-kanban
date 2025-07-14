@@ -4,6 +4,8 @@ import com.yandex.task_tracker.model.Epic;
 import com.yandex.task_tracker.model.Subtask;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,7 +23,7 @@ class EpicTest {
     @Test
     public void epicShouldNotContainItselfAsSubtask() {
         Epic epic = new Epic("Epic", "Main epic", 1, new ArrayList<>());
-        Subtask fakeSelfSubtask = new Subtask("Fake", "Fake subtask", 1, 1);
+        Subtask fakeSelfSubtask = new Subtask("Fake", "Fake subtask", 1, LocalDateTime.now(), Duration.ofMinutes(90), 1);
         epic.addSubtask(fakeSelfSubtask);
 
         assertTrue(epic.getSubtasks().isEmpty());

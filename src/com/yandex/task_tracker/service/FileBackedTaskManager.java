@@ -5,6 +5,8 @@ import com.yandex.task_tracker.model.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
@@ -17,7 +19,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public void save() {
         try (FileWriter writer = new FileWriter(tasksFile, StandardCharsets.UTF_8)) {
 
-            writer.write("id,type,name,status,description,epic" + "\n");
+            writer.write("id,type,name,status,description,startTime,duration,endTime,epic" + "\n");
 
             for (Task task : getAllTasks()) {
                 writer.write(task.toString() + "\n");
@@ -44,7 +46,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             while (buffer.ready()) {
                 String line = buffer.readLine();
                 if ((!line.isBlank() || !line.isEmpty())
-                        && !line.equals("id,type,name,status,description,epic")) {
+                        && !line.equals("id,type,name,status,description,startTime,duration,endTime,epic")) {
                     Task task = fileManager.fromString(line);
                     String[] taskDetails = line.split(",");
 
@@ -71,11 +73,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String name = taskDetails[2];
         Status status = Status.fromString(taskDetails[3]);
         String description = taskDetails[4];
+        LocalDateTime startTime = !taskDetails[5].equals("null")
+                ? LocalDateTime.parse(taskDetails[5], DATE_TIME_FORMATTER) : null;
+        Duration duration = Duration.ofMinutes(Long.parseLong(taskDetails[6]));
+        LocalDateTime endTime = !taskDetails[7].equals("null")
+                ? LocalDateTime.parse(taskDetails[7], DATE_TIME_FORMATTER) : null;
 
         return switch (type) {
-            case TASK -> new Task(name, description, id, status);
-            case SUBTASK -> new Subtask(name, description, id, status, Integer.parseInt(taskDetails[5]));
-            case EPIC -> new Epic(name, description, id, status);
+            case TASK -> new Task(name, description, id, status, startTime, duration);
+            case SUBTASK -> new Subtask(name, description, id, status, startTime, duration, Integer.parseInt(taskDetails[8]));
+            case EPIC -> new Epic(name, description, id, status, startTime, duration, endTime);
         };
     }
 
