@@ -112,12 +112,7 @@ public class InMemoryTaskManager implements TaskManager {
         generateId(task);
         Task copy = new Task(task);
 
-        try {
-            checkTimeOverlap(task);
-        } catch (TimeOverlapException e) {
-            System.out.println(e.getMessage());
-            return;
-        }
+        checkTimeOverlap(task);
 
         tasks.put(copy.getId(), task);
         if (task.getStartTime() != null) {
@@ -134,12 +129,7 @@ public class InMemoryTaskManager implements TaskManager {
         generateId(subtask);
         Subtask copy = new Subtask(subtask);
 
-        try {
-            checkTimeOverlap(subtask);
-        } catch (TimeOverlapException e) {
-            System.out.println(e.getMessage());
-            return;
-        }
+        checkTimeOverlap(subtask);
 
         epic.addSubtask(copy);
         epic.updateDynamicFields();
@@ -160,12 +150,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateTask(Task task) {
         tasksByPriority.remove(tasks.get(task.getId()));
 
-        try {
-            checkTimeOverlap(task);
-        } catch (TimeOverlapException e) {
-            System.out.println(e.getMessage());
-            return;
-        }
+        checkTimeOverlap(task);
 
         tasks.put(task.getId(), task);
         if (task.getStartTime() != null) {
@@ -177,12 +162,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateSubtask(Subtask subtask) {
         tasksByPriority.remove(subtasks.get(subtask.getId()));
 
-        try {
-            checkTimeOverlap(subtask);
-        } catch (TimeOverlapException e) {
-            System.out.println(e.getMessage());
-            return;
-        }
+        checkTimeOverlap(subtask);
 
         subtasks.put(subtask.getId(), subtask);
         if (subtask.getStartTime() != null) {

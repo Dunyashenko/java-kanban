@@ -143,7 +143,7 @@ public class Task implements Comparable<Task> {
     }
 
     public boolean hasTimeOverlap(Task task) {
-        if (task.startTime != null && task.duration != null) {
+        if ((task.startTime != null && task.duration != null) && (this.startTime != null && this.duration != null)) {
             return task.getEndTime().isAfter(this.startTime) && task.startTime.isBefore(this.getEndTime());
         } else {
             return false;

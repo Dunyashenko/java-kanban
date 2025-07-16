@@ -1,5 +1,6 @@
 package service;
 
+import com.yandex.task_tracker.exceptions.TimeOverlapException;
 import com.yandex.task_tracker.model.Epic;
 import com.yandex.task_tracker.model.Status;
 import com.yandex.task_tracker.model.Subtask;
@@ -94,12 +95,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     public void shouldNotCreateTaskIfTimeExecutionOverlaps() {
         Task task1 = new Task("Task 1", "task description 1", 1000, LocalDateTime.now(), Duration.ofMinutes(90));
         Task task2 = new Task("Task 2", "task description 2", 1001, LocalDateTime.now().plusMinutes(30), Duration.ofMinutes(90));
-
         taskManager.createTask(task1);
-        taskManager.createTask(task2);
 
-        assertEquals(1, taskManager.getAllTasks().size());
-        assertEquals(task1, taskManager.getTaskById(1000));
+        assertThrows(TimeOverlapException.class, () -> {
+            taskManager.createTask(task2);
+        });
     }
 
 
