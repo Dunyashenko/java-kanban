@@ -1,5 +1,6 @@
 package service;
 
+import com.yandex.task_tracker.exceptions.NotFoundException;
 import com.yandex.task_tracker.exceptions.TimeOverlapException;
 import com.yandex.task_tracker.model.Epic;
 import com.yandex.task_tracker.model.Status;
@@ -87,7 +88,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         taskManager.createSubtask(subtask1);
 
-        assertNull(taskManager.getSubtaskById(1000));
+        assertThrows(NotFoundException.class, () -> taskManager.getSubtaskById(1000));
 
     }
 
@@ -124,7 +125,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createSubtask(subtask1);
         taskManager.createSubtask(subtask2);
 
-        assertEquals(epicStatus, epic1.getStatus());
+        assertEquals(epicStatus, taskManager.getEpicById(1000).getStatus());
     }
 
     private static Stream<Arguments> epicStatusMonitoringProvider() {
