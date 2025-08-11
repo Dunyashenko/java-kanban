@@ -11,7 +11,7 @@ public class HttpServerConfig {
 
     private InMemoryTaskManager manager;
     private HttpServer server;
-    private final static int PORT = 8080;
+    private static final int PORT = 8080;
 
     public HttpServerConfig(InMemoryTaskManager manager) {
         this.manager = manager;
