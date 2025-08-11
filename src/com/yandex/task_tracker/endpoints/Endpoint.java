@@ -34,9 +34,11 @@ public enum Endpoint {
         StringBuilder pathBuilder = new StringBuilder("/");
         if (pathsArray.length > 1) {
             pathBuilder.append(pathsArray[1]);
-        } if (pathsArray.length > 2) {
+        }
+        if (pathsArray.length > 2) {
             pathBuilder.append("/").append("{id}");
-        } if (pathsArray.length > 3) {
+        }
+        if (pathsArray.length > 3) {
             pathBuilder.append("/").append(pathsArray[3]);
         }
 
