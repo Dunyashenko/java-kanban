@@ -19,7 +19,7 @@ public class BaseHttpHandler {
 
     protected void sendBaseResponse(HttpExchange exchange, String text, int statusCode) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-        try(OutputStream os = exchange.getResponseBody()) {
+        try (OutputStream os = exchange.getResponseBody()) {
             exchange.sendResponseHeaders(statusCode, 0);
             os.write(text.getBytes(DEFAULT_CHARSET));
         }
@@ -27,7 +27,7 @@ public class BaseHttpHandler {
 
     protected void sendNotFound(HttpExchange exchange, String text) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-        try(OutputStream os = exchange.getResponseBody()) {
+        try (OutputStream os = exchange.getResponseBody()) {
             exchange.sendResponseHeaders(404, 0);
             os.write(text.getBytes(DEFAULT_CHARSET));
         }
@@ -35,7 +35,7 @@ public class BaseHttpHandler {
 
     protected void sendIncorrectIdFormat(HttpExchange exchange) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-        try(OutputStream os = exchange.getResponseBody()) {
+        try (OutputStream os = exchange.getResponseBody()) {
             exchange.sendResponseHeaders(400, 0);
             os.write("Check the id format. It should be integer value".getBytes(DEFAULT_CHARSET));
         }
@@ -43,7 +43,7 @@ public class BaseHttpHandler {
 
     protected void sendHasTimeOverlap(HttpExchange exchange, String text) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-        try(OutputStream os = exchange.getResponseBody()) {
+        try (OutputStream os = exchange.getResponseBody()) {
             exchange.sendResponseHeaders(406, 0);
             os.write(text.getBytes(DEFAULT_CHARSET));
         }
@@ -51,7 +51,7 @@ public class BaseHttpHandler {
 
     protected void sendInternalServerError(HttpExchange exchange, String text) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-        try(OutputStream os = exchange.getResponseBody()) {
+        try (OutputStream os = exchange.getResponseBody()) {
             exchange.sendResponseHeaders(500, 0);
             os.write(text.getBytes(DEFAULT_CHARSET));
         }
