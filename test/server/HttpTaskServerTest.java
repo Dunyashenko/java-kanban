@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -112,12 +113,12 @@ public class HttpTaskServerTest {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        if (response.statusCode() == 200) {
+        if (response.statusCode() == HttpURLConnection.HTTP_OK) {
             JsonElement jsonElement = JsonParser.parseString(response.body());
             if (jsonElement.isJsonObject()) {
                 JsonObject jsonObject = jsonElement.getAsJsonObject();
                 String name = jsonObject.get("name").getAsString();
-                assertEquals(200, response.statusCode());
+                assertEquals(HttpURLConnection.HTTP_OK, response.statusCode());
                 assertEquals(assertString, name);
             }
         } else {
@@ -157,22 +158,22 @@ public class HttpTaskServerTest {
 
     private static Stream<Arguments> postTaskEndpoint() {
         return Stream.of(
-                Arguments.of(201, "Created", LocalDateTime.now().plusDays(1)),
-                Arguments.of(406, "TimeOverlap", LocalDateTime.now())
+                Arguments.of(HttpURLConnection.HTTP_CREATED, "Created", LocalDateTime.now().plusDays(1)),
+                Arguments.of(HttpURLConnection.HTTP_NOT_ACCEPTABLE, "TimeOverlap", LocalDateTime.now())
         );
     }
 
     private static Stream<Arguments> getTaskByIdEndpoint() {
         return Stream.of(
-                Arguments.of(200, 1000, "Task 1"),
-                Arguments.of(404, 1001, "Task with id " + 1001 + " is not found")
+                Arguments.of(HttpURLConnection.HTTP_OK, 1000, "Task 1"),
+                Arguments.of(HttpURLConnection.HTTP_NOT_FOUND, 1001, "Task with id " + 1001 + " is not found")
         );
     }
 
     private static Stream<Arguments> deleteTaskByIdEndpoint() {
         return Stream.of(
-                Arguments.of(201, 1000, "Deleted"),
-                Arguments.of(404, 1001, "Task with id " + 1001 + " is not found")
+                Arguments.of(HttpURLConnection.HTTP_CREATED, 1000, "Deleted"),
+                Arguments.of(HttpURLConnection.HTTP_NOT_FOUND, 1001, "Task with id " + 1001 + " is not found")
         );
     }
 

@@ -8,6 +8,7 @@ import com.yandex.task_tracker.utils.LocalDateTimeAdapter;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -28,7 +29,7 @@ public class BaseHttpHandler {
     protected void sendNotFound(HttpExchange exchange, String text) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
         try (OutputStream os = exchange.getResponseBody()) {
-            exchange.sendResponseHeaders(404, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
             os.write(text.getBytes(DEFAULT_CHARSET));
         }
     }
@@ -36,7 +37,7 @@ public class BaseHttpHandler {
     protected void sendIncorrectIdFormat(HttpExchange exchange) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
         try (OutputStream os = exchange.getResponseBody()) {
-            exchange.sendResponseHeaders(400, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
             os.write("Check the id format. It should be integer value".getBytes(DEFAULT_CHARSET));
         }
     }
@@ -44,7 +45,7 @@ public class BaseHttpHandler {
     protected void sendHasTimeOverlap(HttpExchange exchange, String text) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
         try (OutputStream os = exchange.getResponseBody()) {
-            exchange.sendResponseHeaders(406, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_ACCEPTABLE, 0);
             os.write(text.getBytes(DEFAULT_CHARSET));
         }
     }
@@ -52,7 +53,7 @@ public class BaseHttpHandler {
     protected void sendInternalServerError(HttpExchange exchange, String text) throws IOException {
         exchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
         try (OutputStream os = exchange.getResponseBody()) {
-            exchange.sendResponseHeaders(500, 0);
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_INTERNAL_ERROR, 0);
             os.write(text.getBytes(DEFAULT_CHARSET));
         }
     }

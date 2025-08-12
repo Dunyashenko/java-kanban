@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -77,7 +78,7 @@ public class HttpHistoryServerTest {
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(200, response.statusCode());
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode());
         List<Task> tasks = gson.fromJson(response.body(), new TypeToken<List<Task>>(){}.getType());
 
         assertEquals(3, tasks.size());

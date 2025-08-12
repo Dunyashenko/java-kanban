@@ -13,6 +13,7 @@ import com.yandex.task_tracker.service.TaskManager;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.Optional;
 
 public class TasksHandler extends BaseHttpHandler implements HttpHandler {
@@ -38,7 +39,7 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
                 case Endpoint.DELETE_TASK_BY_ID -> handleDeleteTaskById(exchange);
             }
         } else {
-            sendBaseResponse(exchange, "There is no such an endpoint. Check the address and try again", 404);
+            sendBaseResponse(exchange, "There is no such an endpoint. Check the address and try again", HttpURLConnection.HTTP_NOT_FOUND);
         }
 
     }
@@ -47,7 +48,7 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
         Gson gson = getGsonConfig();
         String response = gson.toJson(manager.getAllTasks());
 
-        sendBaseResponse(exchange, response, 200);
+        sendBaseResponse(exchange, response, HttpURLConnection.HTTP_OK);
     }
 
     private void handleGetTaskById(HttpExchange exchange) throws IOException {
@@ -56,7 +57,7 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
             try {
                 Gson gson = getGsonConfig();
                 Task task = manager.getTaskById(optTaskId.get());
-                sendBaseResponse(exchange, gson.toJson(task), 200);
+                sendBaseResponse(exchange, gson.toJson(task), HttpURLConnection.HTTP_OK);
             } catch (NotFoundException ex) {
                 sendNotFound(exchange, ex.getMessage());
             }
@@ -68,17 +69,17 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
     private void handlePostTask(HttpExchange exchange) throws IOException {
         Headers headers = exchange.getRequestHeaders();
         if (!headers.getFirst("Content-Type").equals("application/json")) {
-            sendBaseResponse(exchange, "Request body should be in JSON format", 406);
+            sendBaseResponse(exchange, "Request body should be in JSON format", HttpURLConnection.HTTP_NOT_ACCEPTABLE);
             return;
         }
         try {
             Task task = parseTask(exchange.getRequestBody());
             if (task.getId() == null) {
                 manager.createTask(task);
-                sendBaseResponse(exchange, "", 201);
+                sendBaseResponse(exchange, "", HttpURLConnection.HTTP_CREATED);
             } else {
                 manager.updateTask(task);
-                sendBaseResponse(exchange, "", 201);
+                sendBaseResponse(exchange, "", HttpURLConnection.HTTP_CREATED);
             }
         } catch (TimeOverlapException ex) {
             sendHasTimeOverlap(exchange, ex.getMessage());
@@ -92,7 +93,7 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
         if (optTaskId.isPresent()) {
             try {
                 manager.deleteTaskById(optTaskId.get());
-                sendBaseResponse(exchange, "", 201);
+                sendBaseResponse(exchange, "", HttpURLConnection.HTTP_CREATED);
             } catch (NotFoundException ex) {
                 sendNotFound(exchange, ex.getMessage());
             } catch (ManagerSaveException ex) {

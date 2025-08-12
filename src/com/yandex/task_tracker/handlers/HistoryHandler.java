@@ -7,9 +7,11 @@ import com.yandex.task_tracker.endpoints.Endpoint;
 import com.yandex.task_tracker.service.HistoryManager;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.Optional;
 
 public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
+
     private final HistoryManager manager;
 
     public HistoryHandler(HistoryManager manager) {
@@ -28,7 +30,7 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
                 case Endpoint.GET_HISTORY -> handleGetHistory(exchange);
             }
         } else {
-            sendBaseResponse(exchange, "There is no such an endpoint. Check the address and try again", 404);
+            sendBaseResponse(exchange, "There is no such an endpoint. Check the address and try again", HttpURLConnection.HTTP_NOT_FOUND);
         }
 
     }
@@ -37,6 +39,6 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
         Gson gson = getGsonConfig();
         String response = gson.toJson(manager.getHistory());
 
-        sendBaseResponse(exchange, response, 200);
+        sendBaseResponse(exchange, response, HttpURLConnection.HTTP_OK);
     }
 }

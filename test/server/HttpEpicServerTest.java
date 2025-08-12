@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -70,7 +71,7 @@ public class HttpEpicServerTest {
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(201, response.statusCode());
+        assertEquals(HttpURLConnection.HTTP_CREATED, response.statusCode());
 
         Epic epicFromManager = manager.getEpicById(1000);
         assertEquals(epic.getName(), epicFromManager.getName());
@@ -97,12 +98,12 @@ public class HttpEpicServerTest {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        if (response.statusCode() == 200) {
+        if (response.statusCode() == HttpURLConnection.HTTP_OK) {
             JsonElement jsonElement = JsonParser.parseString(response.body());
             if (jsonElement.isJsonObject()) {
                 JsonObject jsonObject = jsonElement.getAsJsonObject();
                 String name = jsonObject.get("name").getAsString();
-                assertEquals(200, response.statusCode());
+                assertEquals(HttpURLConnection.HTTP_OK, response.statusCode());
                 assertEquals(assertString, name);
             }
         } else {
@@ -160,22 +161,22 @@ public class HttpEpicServerTest {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(200, response.statusCode());
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode());
         List<Subtask> subtasks = gson.fromJson(response.body(), new TypeToken<List<Subtask>>(){}.getType());
         assertEquals(2, subtasks.size());
     }
 
     private static Stream<Arguments> getEpicByIdEndpoint() {
         return Stream.of(
-                Arguments.of(200, 1000, "Epic 1"),
-                Arguments.of(404, 1001, "Epic with id " + 1001 + " is not found")
+                Arguments.of(HttpURLConnection.HTTP_OK, 1000, "Epic 1"),
+                Arguments.of(HttpURLConnection.HTTP_NOT_FOUND, 1001, "Epic with id " + 1001 + " is not found")
         );
     }
 
     private static Stream<Arguments> deleteEpicByIdEndpoint() {
         return Stream.of(
-                Arguments.of(201, 1000, "Deleted"),
-                Arguments.of(404, 1001, "Epic with id " + 1001 + " is not found")
+                Arguments.of(HttpURLConnection.HTTP_CREATED, 1000, "Deleted"),
+                Arguments.of(HttpURLConnection.HTTP_NOT_FOUND, 1001, "Epic with id " + 1001 + " is not found")
         );
     }
 }

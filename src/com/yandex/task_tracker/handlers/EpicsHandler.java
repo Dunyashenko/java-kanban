@@ -12,9 +12,11 @@ import com.yandex.task_tracker.service.TaskManager;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.Optional;
 
 public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
+
     private final TaskManager manager;
 
     public EpicsHandler(TaskManager manager) {
@@ -46,7 +48,7 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
         Gson gson = getGsonConfig();
         String response = gson.toJson(manager.getAllEpics());
 
-        sendBaseResponse(exchange, response, 200);
+        sendBaseResponse(exchange, response, HttpURLConnection.HTTP_OK);
     }
 
     private void handleGetEpicById(HttpExchange exchange) throws IOException {
@@ -55,7 +57,7 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
             try {
                 Gson gson = getGsonConfig();
                 Epic epic = manager.getEpicById(optEpicId.get());
-                sendBaseResponse(exchange, gson.toJson(epic), 200);
+                sendBaseResponse(exchange, gson.toJson(epic), HttpURLConnection.HTTP_OK);
             } catch (NotFoundException ex) {
                 sendNotFound(exchange, ex.getMessage());
             }
@@ -71,7 +73,7 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
                 Gson gson = getGsonConfig();
                 Epic epic = manager.getEpicById(optEpicId.get());
                 String response = gson.toJson(epic.getSubtasks());
-                sendBaseResponse(exchange, response, 200);
+                sendBaseResponse(exchange, response, HttpURLConnection.HTTP_OK);
             } catch (NotFoundException ex) {
                 sendNotFound(exchange, ex.getMessage());
             }
@@ -83,17 +85,17 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
     private void handlePostEpic(HttpExchange exchange) throws IOException {
         Headers headers = exchange.getRequestHeaders();
         if (!headers.getFirst("Content-Type").equals("application/json")) {
-            sendBaseResponse(exchange, "Request body should be in JSON format", 406);
+            sendBaseResponse(exchange, "Request body should be in JSON format", HttpURLConnection.HTTP_NOT_ACCEPTABLE);
             return;
         }
         try {
             Epic epic = parseEpic(exchange.getRequestBody());
             if (epic.getId() == null) {
                 manager.createEpic(epic);
-                sendBaseResponse(exchange, "", 201);
+                sendBaseResponse(exchange, "", HttpURLConnection.HTTP_CREATED);
             } else {
                 manager.updateEpic(epic);
-                sendBaseResponse(exchange, "", 201);
+                sendBaseResponse(exchange, "", HttpURLConnection.HTTP_CREATED);
             }
         } catch (ManagerSaveException ex) {
             sendInternalServerError(exchange, ex.getMessage());
@@ -105,7 +107,7 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
         if (optEpicId.isPresent()) {
             try {
                 manager.deleteEpicById(optEpicId.get());
-                sendBaseResponse(exchange, "", 201);
+                sendBaseResponse(exchange, "", HttpURLConnection.HTTP_CREATED);
             } catch (NotFoundException ex) {
                 sendNotFound(exchange, ex.getMessage());
             } catch (ManagerSaveException ex) {

@@ -13,9 +13,11 @@ import com.yandex.task_tracker.service.TaskManager;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.Optional;
 
 public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
+
     private final TaskManager manager;
 
     public SubtasksHandler(TaskManager manager) {
@@ -37,7 +39,7 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
                 case Endpoint.DELETE_SUBTASK_BY_ID -> handleDeleteSubtaskById(exchange);
             }
         } else {
-            sendBaseResponse(exchange, "There is no such an endpoint. Check the address and try again", 404);
+            sendBaseResponse(exchange, "There is no such an endpoint. Check the address and try again", HttpURLConnection.HTTP_NOT_FOUND);
         }
 
     }
@@ -46,7 +48,7 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
         Gson gson = getGsonConfig();
         String response = gson.toJson(manager.getAllSubtasks());
 
-        sendBaseResponse(exchange, response, 200);
+        sendBaseResponse(exchange, response, HttpURLConnection.HTTP_OK);
     }
 
     private void handleGetSubtaskById(HttpExchange exchange) throws IOException {
@@ -55,7 +57,7 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
             try {
                 Gson gson = getGsonConfig();
                 Subtask subtask = manager.getSubtaskById(optSubtaskId.get());
-                sendBaseResponse(exchange, gson.toJson(subtask), 200);
+                sendBaseResponse(exchange, gson.toJson(subtask), HttpURLConnection.HTTP_OK);
             } catch (NotFoundException ex) {
                 sendNotFound(exchange, ex.getMessage());
             }
@@ -67,17 +69,17 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
     private void handlePostSubtask(HttpExchange exchange) throws IOException {
         Headers headers = exchange.getRequestHeaders();
         if (!headers.getFirst("Content-Type").equals("application/json")) {
-            sendBaseResponse(exchange, "Request body should be in JSON format", 406);
+            sendBaseResponse(exchange, "Request body should be in JSON format", HttpURLConnection.HTTP_NOT_ACCEPTABLE);
             return;
         }
         try {
             Subtask subtask = parseSubtask(exchange.getRequestBody());
             if (subtask.getId() == null) {
                 manager.createSubtask(subtask);
-                sendBaseResponse(exchange, "", 201);
+                sendBaseResponse(exchange, "", HttpURLConnection.HTTP_CREATED);
             } else {
                 manager.updateSubtask(subtask);
-                sendBaseResponse(exchange, "", 201);
+                sendBaseResponse(exchange, "", HttpURLConnection.HTTP_CREATED);
             }
         } catch (TimeOverlapException ex) {
             sendHasTimeOverlap(exchange, ex.getMessage());
@@ -91,7 +93,7 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
         if (optSubtaskId.isPresent()) {
             try {
                 manager.deleteSubtaskById(optSubtaskId.get());
-                sendBaseResponse(exchange, "", 201);
+                sendBaseResponse(exchange, "", HttpURLConnection.HTTP_CREATED);
             } catch (NotFoundException ex) {
                 sendNotFound(exchange, ex.getMessage());
             } catch (ManagerSaveException ex) {
