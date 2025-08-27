@@ -1,5 +1,6 @@
 package com.yandex.task_tracker.service;
 
+import com.yandex.task_tracker.exceptions.NotFoundException;
 import com.yandex.task_tracker.exceptions.TimeOverlapException;
 import com.yandex.task_tracker.model.Task;
 import com.yandex.task_tracker.model.Epic;
@@ -79,32 +80,32 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskById(int id) {
-        Task task = tasks.get(id);
-        if (task != null) {
-            historyManager.add(task);
-            return new Task(task);
-        }
-        return null;
+        Task copy = tasks.values().stream()
+                .filter(task -> task.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Task with id " + id + " is not found"));
+        historyManager.add(copy);
+        return new Task(copy);
     }
 
     @Override
     public Subtask getSubtaskById(int id) {
-        Subtask subtask = subtasks.get(id);
-        if (subtask != null) {
-            historyManager.add(subtask);
-            return new Subtask(subtask);
-        }
-        return null;
+        Subtask copy = subtasks.values().stream()
+                .filter(subtask -> subtask.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Subtask with id " + id + " is not found"));
+        historyManager.add(copy);
+        return new Subtask(copy);
     }
 
     @Override
     public Epic getEpicById(int id) {
-        Epic epic = epics.get(id);
-        if (epic != null) {
-            historyManager.add(epic);
-            return new Epic(epic);
-        }
-        return null;
+        Epic copy = epics.values().stream()
+                .filter(epic -> epic.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Epic with id " + id + " is not found"));
+        historyManager.add(copy);
+        return new Epic(copy);
     }
 
     @Override
@@ -112,11 +113,11 @@ public class InMemoryTaskManager implements TaskManager {
         generateId(task);
         Task copy = new Task(task);
 
-        checkTimeOverlap(task);
+        checkTimeOverlap(copy);
 
-        tasks.put(copy.getId(), task);
+        tasks.put(copy.getId(), copy);
         if (task.getStartTime() != null) {
-            tasksByPriority.add(task);
+            tasksByPriority.add(copy);
         }
     }
 
@@ -126,16 +127,18 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic == null) {
             return;
         }
+
         generateId(subtask);
         Subtask copy = new Subtask(subtask);
 
-        checkTimeOverlap(subtask);
+        checkTimeOverlap(copy);
 
         epic.addSubtask(copy);
         epic.updateDynamicFields();
-        subtasks.put(copy.getId(), subtask);
-        if (subtask.getStartTime() != null) {
-            tasksByPriority.add(subtask);
+        subtasks.put(copy.getId(), copy);
+
+        if (copy.getStartTime() != null) {
+            tasksByPriority.add(copy);
         }
     }
 
@@ -143,7 +146,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void createEpic(Epic epic) {
         generateId(epic);
         Epic copy = new Epic(epic);
-        epics.put(copy.getId(), epic);
+        epics.put(copy.getId(), copy);
     }
 
     @Override
@@ -195,6 +198,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTaskById(int id) {
+        Task task = tasks.get(id);
+        if (task == null) {
+            throw new NotFoundException("Task with id " + id + " is not found");
+        }
         historyManager.remove(id);
         tasksByPriority.remove(tasks.get(id));
         tasks.remove(id);
@@ -204,7 +211,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteSubtaskById(int id) {
         Subtask subtask = subtasks.get(id);
         if (subtask == null) {
-            return;
+            throw new NotFoundException("Subtask with id " + id + " is not found");
         }
         Epic epic = epics.get(subtask.getEpicId());
         if (epic == null) {
@@ -221,7 +228,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteEpicById(int id) {
         Epic epic = epics.get(id);
         if (epic == null) {
-            return;
+            throw new NotFoundException("Epic with id " + id + " is not found");
         }
         epic.getSubtasks().forEach(subtask -> {
             historyManager.remove(subtask.getId());
@@ -241,6 +248,7 @@ public class InMemoryTaskManager implements TaskManager {
         return epics.get(id).getSubtasks();
     }
 
+    @Override
     public List<Task> getPrioritizedTasks() {
         return new ArrayList<>(tasksByPriority);
     }

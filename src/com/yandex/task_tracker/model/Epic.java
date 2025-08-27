@@ -32,7 +32,7 @@ public class Epic extends Task {
     }
 
     public Epic(Epic epic) {
-        super(epic.getName(), epic.getDescription(), epic.getId(), epic.getStartTime(), epic.getDuration());
+        super(epic.getName(), epic.getDescription(), epic.getId(), epic.getStatus(), epic.getStartTime(), epic.getDuration());
         this.subtasks = epic.getSubtasks();
         this.endTime = epic.getEndTime();
     }
